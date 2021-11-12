@@ -1,0 +1,8 @@
+{
+  "runtimeOptions": {
+    "additionalProbingPaths": [
+      "C:\\Users\\mogod\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\mogod\\.nuget\\packages"
+    ]
+  }
+}
