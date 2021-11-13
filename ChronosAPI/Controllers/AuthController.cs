@@ -50,14 +50,5 @@ namespace ChronosAPI.Controllers
 
             return Ok(response);
         }
-
-        [Route("/api/users")]
-        [Authorize]
-        [HttpGet]
-        public IActionResult GetFirstUser()
-        {
-            var users = _userService.GetUserById(8);
-            return Ok(users);
-        }
     }
 }
