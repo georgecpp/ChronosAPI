@@ -1,5 +1,5 @@
-
 using System;
+using System.Text.Json.Serialization;
 
 namespace ChronosAPI.Models
 {
@@ -7,12 +7,14 @@ namespace ChronosAPI.Models
     {
         public int UserId { get; set; }
 
-        public String FirstName{ get; set; }
+        public string FirstName { get; set; }
 
-        public String LastName { get; set; }
+        public string LastName { get; set; }
 
-        public String Email { get; set; }
-        public String Password { get; set; }
+        public string Email { get; set; }
+
+        [JsonIgnore]
+        public string Password { get; set; }
 
         public DateTime DateOfBirth { get; set; }
 
