@@ -4,31 +4,36 @@ using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Threading.Tasks;
+using ChronosAPI.Helpers;
 using ChronosAPI.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 
 namespace ChronosAPI.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class PlanDispatcherController : ControllerBase
     {
-        private readonly IConfiguration _configuration;
+        private readonly AppSettings _appSettings;
 
-        public PlanDispatcherController(IConfiguration configuration)
+
+        public PlanDispatcherController(IOptions<AppSettings> appSettings)
         {
-            _configuration = configuration;
+            _appSettings = appSettings.Value;
         }
 
         [HttpGet]
+       
 
         public JsonResult GetPlanDispatchers()
         {
             string query = @" SELECT * from dbo.Plan_Dispatcher";
             DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("ChronosDBCon");
+            string sqlDataSource = _appSettings.ChronosDBCon;
             SqlDataReader myReader;
             using (SqlConnection myCon = new SqlConnection(sqlDataSource))
             {
@@ -50,7 +55,7 @@ namespace ChronosAPI.Controllers
             string query = @" INSERT into dbo.Plan_Dispatcher (UserID, PlanID, AssignedAt)
                             VALUES (@UserID, @PlanID, @AssignedAt)";
             DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("ChronosDBCon");
+            string sqlDataSource = _appSettings.ChronosDBCon;
             SqlDataReader myReader;
 
             //---------------USER HANDLING--------------------------------
@@ -120,7 +125,7 @@ namespace ChronosAPI.Controllers
         {
             string query = @" DELETE from dbo.Plan_Dispatcher where UserID=@UserID";
             DataTable table = new DataTable();
-            string sqlDataSource = _configuration.GetConnectionString("ChronosDBCon");
+            string sqlDataSource = _appSettings.ChronosDBCon;
             SqlDataReader myReader;
 
             //----------------------PLAN DISPATCHER TABLE--------------------------
