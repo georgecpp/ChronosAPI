@@ -14,6 +14,7 @@ using System.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Http;
+using ChronosAPI.Exceptions;
 
 namespace ChronosAPI.Services
 {
@@ -36,7 +37,7 @@ namespace ChronosAPI.Services
         {
             if(string.IsNullOrEmpty(model.Email) || string.IsNullOrEmpty(model.Password))
             {
-                return null; // CREDENTIALS EMPTY
+                throw new CredentialsEmptyException();
             }
 
             // check if email exists in db, get user.
@@ -60,7 +61,7 @@ namespace ChronosAPI.Services
 
             if(table.Rows.Count == 0)
             {
-                return null; // USER WITH THAT EMAIL WAS NOT FOUND
+                throw new UserEmailNotFoundException();
             }
 
             var userRow = table.AsEnumerable().SingleOrDefault(row => model.Email == row.Field<string>("Email"));
@@ -73,11 +74,10 @@ namespace ChronosAPI.Services
             user.CreatedAt = userRow.Field<DateTime>("CreatedAt");
             user.Password = userRow.Field<string>("Password");
 
-            byte[] passwordHash;
-            CreatePasswordHash(model.Password, out passwordHash);
-            if(passwordHash.ToString() != user.Password)
+ 
+            if (!(BCrypt.Net.BCrypt.Verify(model.Password, user.Password)))
             {
-                return null; // INVALID PASSWORD
+                throw new UserInvalidPasswordException();
             }
 
             // authentication successful so generate jwt token
@@ -88,13 +88,39 @@ namespace ChronosAPI.Services
 
         public RegisterResponse Register(User user)
         {
-            // Validate user first
+            // Check if credentials are sent.
+            if(user.FirstName == null || user.LastName == null || user.Email == null || user.Password == null || user.DateOfBirth == null )
+            {
+                throw new CredentialsEmptyException();
+            }
+
+            // validate user exists in the DB.
+
+            DataTable table = new DataTable();
+            string sqlDataSource = _appSettings.ChronosDBCon;
+            string queryUserExists = @" SELECT * from dbo.Users WHERE Email = @Email";
+            SqlDataReader userExistsReader;
+            using (SqlConnection myCon = new SqlConnection(sqlDataSource))
+            {
+                myCon.Open();
+                using (SqlCommand myCommand = new SqlCommand(queryUserExists, myCon))
+                {
+                    myCommand.Parameters.AddWithValue("@Email", user.Email);
+                    userExistsReader = myCommand.ExecuteReader();
+                    table.Load(userExistsReader);
+                    userExistsReader.Close();
+                    myCon.Close();
+                }
+            }
+
+            if (table.Rows.Count > 0)
+            {
+                throw new UserAlreadyRegisteredException();
+            }
 
             // hash password
-            byte[] passwordHash;
-            CreatePasswordHash(user.Password, out passwordHash);
-            user.Password = passwordHash.ToString();
-            
+            string oldPassword = user.Password;
+            user.Password = BCrypt.Net.BCrypt.HashPassword(oldPassword);
 
             string query = @" INSERT INTO [dbo].[Users]
            ([FirstName]
@@ -111,8 +137,7 @@ namespace ChronosAPI.Services
            @DateOfBirth,
            @CreatedAt)";
 
-            DataTable table = new DataTable();
-            string sqlDataSource = _appSettings.ChronosDBCon;
+            table = new DataTable();
             SqlDataReader myReader;
             using (SqlConnection myCon = new SqlConnection(sqlDataSource))
             {
@@ -151,24 +176,6 @@ namespace ChronosAPI.Services
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
             return tokenHandler.WriteToken(token);
-        }
-
-        private static void CreatePasswordHash(string password, out byte[] passwordHash)
-        {
-            if(password == null)
-            {
-                throw new ArgumentNullException("password");
-            }
-
-            if(string.IsNullOrWhiteSpace(password))
-            {
-                throw new ArgumentException("Value cannot be empty or whitespace.", "password");
-            }
-
-            using (var hmac = new System.Security.Cryptography.HMACSHA512())
-            {
-                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
-            }
         }
 
         public User GetUserById(int id)

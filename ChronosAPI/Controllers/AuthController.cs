@@ -10,6 +10,7 @@ using System.Data.SqlClient;
 using System.Data;
 using ChronosAPI.Services;
 using ChronosAPI.Helpers;
+using ChronosAPI.Exceptions;
 
 namespace ChronosAPI.Controllers
 {
@@ -27,14 +28,29 @@ namespace ChronosAPI.Controllers
         [HttpPost]
         public IActionResult Login(AuthenticateRequest req)
         {
-            var response = _userService.Authenticate(req);
-
-            if(response == null)
+            try
             {
-                return BadRequest(new { message = "Username or password is incorrect!" });
-            }
+                var response = _userService.Authenticate(req);
 
-            return Ok(response);
+                if (response == null)
+                {
+                    return BadRequest(new { message = "Login failed... It's on us." });
+                }
+
+                return Ok(response);
+            }
+            catch(CredentialsEmptyException)
+            {
+                return BadRequest(new { message = "Credentials Empty. Fill all the boxes." });
+            }
+            catch(UserEmailNotFoundException)
+            {
+                return BadRequest(new { message = "Wrong Email. Check again." });
+            }
+            catch (UserInvalidPasswordException)
+            {
+                return BadRequest(new { message = "Invalid password. Check again." });
+            }
         }
 
 
@@ -42,13 +58,25 @@ namespace ChronosAPI.Controllers
         [HttpPost]
         public IActionResult Register(User user)
         {
-            var response = _userService.Register(user);
-            if (response == null)
+            try
             {
-                return BadRequest(new { message = "Register failed" });
-            }
+                var response = _userService.Register(user);
+                if (response == null)
+                {
+                    return BadRequest(new { message = "Register failed... It's on us." });
+                }
 
-            return Ok(response);
+                return Ok(response);
+            }
+            catch(CredentialsEmptyException)
+            {
+                return BadRequest(new { message = "Credentials Empty.Fill all the boxes." });
+
+            }
+            catch (UserAlreadyRegisteredException)
+            {
+                return BadRequest(new { message = "User already registered. Login instead." });
+            }
         }
     }
 }

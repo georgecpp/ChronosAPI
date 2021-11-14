@@ -6,11 +6,13 @@ using ChronosAPI.Helpers;
 using ChronosAPI.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 using Newtonsoft.Json.Serialization;
 
 namespace ChronosAPI
@@ -27,6 +29,9 @@ namespace ChronosAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddControllers();
+
+
             services.AddCors(c =>
             {
                 c.AddPolicy("AllowOrigin", options => options.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
@@ -45,7 +50,21 @@ namespace ChronosAPI
             // configure DI for application services
             services.AddScoped<IUserService, UserService>();
 
-            services.AddControllers();
+            //services.AddSwaggerGen(c =>
+            //{
+            //    c.SwaggerDoc("v1", new OpenApiInfo
+            //    {
+            //        Title = "Chronos API",
+            //        Version = "v1",
+            //        Description = "Chronos API provided by Androcpp, KBA & Miaumarmota. Enjoy :)",
+            //        Contact = new OpenApiContact
+            //        {
+            //            Name = "George Andronache",
+            //            Email = "georgeandronache.cpp@gmail.com",
+            //            Url = new Uri("https://www.linkedin.com/in/george-andronache-b74355197/"),
+            //        },
+            //    });
+            //});
 
         }
 
@@ -59,9 +78,18 @@ namespace ChronosAPI
                 app.UseDeveloperExceptionPage();
             }
 
+
             app.UseRouting();
 
             app.UseAuthorization();
+
+
+            //app.UseSwagger();
+            //app.UseSwaggerUI(c =>
+            //{
+            //    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Chronos API V1");
+            //    c.RoutePrefix = string.Empty;
+            //});
 
 
             // custom jwt auth middleware

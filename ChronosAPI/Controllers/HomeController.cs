@@ -12,7 +12,6 @@ namespace ChronosAPI.Controllers
     public class HomeController : ControllerBase
     {
         [HttpGet]
-
         public string GetHome()
         {
             return "Welcome to Home Route of ChronosAPI!!";

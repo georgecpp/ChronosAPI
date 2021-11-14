@@ -24,7 +24,6 @@ namespace ChronosAPI.Controllers
             _appSettings = appSettings.Value;
         }
 
-
         [HttpGet]
         public JsonResult GetTaskDispatchers()
         {
