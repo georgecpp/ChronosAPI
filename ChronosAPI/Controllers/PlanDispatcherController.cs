@@ -20,7 +20,6 @@ namespace ChronosAPI.Controllers
     {
         private readonly AppSettings _appSettings;
 
-
         public PlanDispatcherController(IOptions<AppSettings> appSettings)
         {
             _appSettings = appSettings.Value;
@@ -31,6 +30,8 @@ namespace ChronosAPI.Controllers
 
         public JsonResult GetPlanDispatchers()
         {
+            JsonResult result = new JsonResult("");
+
             string query = @" SELECT * from dbo.Plan_Dispatcher";
             DataTable table = new DataTable();
             string sqlDataSource = _appSettings.ChronosDBCon;
@@ -46,12 +47,23 @@ namespace ChronosAPI.Controllers
                     myCon.Close();
                 }
             }
-            return new JsonResult(table);
+
+            if(table.Rows.Count == 0)
+            {
+                result.StatusCode = 404;
+                result.Value = "No Plan Dispatchers created!";
+                return result;
+            }
+            result.StatusCode = 200;
+            result.Value = table;
+            return result;
         }
 
         [HttpPost]
         public JsonResult PostPlanDispatcher(PlanDispatcher planDispatcher)
         {
+            JsonResult result = new JsonResult("");
+
             string query = @" INSERT into dbo.Plan_Dispatcher (UserID, PlanID, AssignedAt)
                             VALUES (@UserID, @PlanID, @AssignedAt)";
             DataTable table = new DataTable();
@@ -95,11 +107,15 @@ namespace ChronosAPI.Controllers
 
                 if (!userExists)
                 {
-                    return new JsonResult("User does not exit in Database!!!");
+                    result.StatusCode = 404;
+                    result.Value = "User does not exit in Database!!!";
+                    return result;
                 }
                 else if (!planExists)
                 {
-                    return new JsonResult("Plan does not exit in Database!!!");
+                    result.StatusCode = 404;
+                    result.Value = "Plan does not exit in Database!!!";
+                    return result;
                 }
                 else
                 {
@@ -116,13 +132,17 @@ namespace ChronosAPI.Controllers
                     }
                 }
             }
-            return new JsonResult("Insert succesfull!!!");
+            result.StatusCode = 200;
+            result.Value = "Insert succesfull!!!";
+            return result;
         }
 
         [HttpDelete]
 
         public JsonResult DeletePlanDispatcher(PlanDispatcher planDispatcher)
         {
+            JsonResult result = new JsonResult("");
+
             string query = @" DELETE from dbo.Plan_Dispatcher where UserID=@UserID";
             DataTable table = new DataTable();
             string sqlDataSource = _appSettings.ChronosDBCon;
@@ -148,7 +168,9 @@ namespace ChronosAPI.Controllers
                     myCon.Close();
                     if (!planDispatcherExists)
                     {
-                        return new JsonResult("This user does not have a plan assigned!!");
+                        result.StatusCode = 404;
+                        result.Value = "This user does not have a plan assigned!!";
+                        return result;
                     }
                     //-----------------------------------------------------------------
                     myCon.Open();
@@ -162,7 +184,9 @@ namespace ChronosAPI.Controllers
                     }
                 }
             }
-            return new JsonResult("Delete succesfull!!!");
+            result.StatusCode = 200;
+            result.Value = "Delete succesfull!!!";
+            return result;
         }
     }
 
