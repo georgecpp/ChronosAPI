@@ -74,4 +74,3 @@ D:\Chronos\ChronosAPI\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Protocols.
 D:\Chronos\ChronosAPI\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 D:\Chronos\ChronosAPI\bin\Debug\netcoreapp3.1\Microsoft.IdentityModel.Tokens.dll
 D:\Chronos\ChronosAPI\bin\Debug\netcoreapp3.1\System.IdentityModel.Tokens.Jwt.dll
-C:\Users\Andronache\Desktop\_George\Chronos\ChronosAPI\obj\Debug\netcoreapp3.1\ChronosAPI.csproj.CopyComplete
