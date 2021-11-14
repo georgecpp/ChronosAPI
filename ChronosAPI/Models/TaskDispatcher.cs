@@ -5,11 +5,12 @@ using System.Threading.Tasks;
 
 namespace ChronosAPI.Models
 {
-    public class PlanDispatcher
+    public class TaskDispatcher
     {
-        public int PlanDispatcherId { get; set; }
+        public int TaskDispatcherId { get; set; }
+        public int TaskId { get; set; }
         public int UserId { get; set; }
-        public int PlanId { get; set; }
-        public DateTime? AssignedAt { get; set; }
+
+        public int BucketId { get; set; }
     }
 }

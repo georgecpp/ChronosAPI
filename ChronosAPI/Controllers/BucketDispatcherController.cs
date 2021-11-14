@@ -48,7 +48,7 @@ namespace ChronosAPI.Controllers
             if (table.Rows.Count == 0)
             {
                 result.StatusCode = 404;
-                result.Value = "Data table is empty!";
+                result.Value = "Buckets table is empty!";
                 return result;
             }
             result.StatusCode = 200;
@@ -137,7 +137,7 @@ namespace ChronosAPI.Controllers
 
         public JsonResult DeleteBucketDispatcher(BucketDispatcher bucketDispatcher)
         {
-            string query = @" DELETE from dbo.Bucket_Dispatcher where BucketID=@BucketID";
+            string query = @" DELETE from dbo.Bucket_Dispatcher where BucketID=@BucketID and PlanID = @PlanID";
             DataTable table = new DataTable();
             string sqlDataSource = _appSettings.ChronosDBCon;
             SqlDataReader myReader;
@@ -151,13 +151,12 @@ namespace ChronosAPI.Controllers
             using (SqlConnection myCon = new SqlConnection(sqlDataSource))
             {
                 {
-                    //CHECK IF USER EXISTS IN USER TABLE
 
                     myCon.Open();
-                    SqlCommand getAllPlanDispatchers = new SqlCommand(selectQueryBucketDispatchers, myCon);
-                    bucketDispatcherReader = getAllPlanDispatchers.ExecuteReader();
+                    SqlCommand getAllBucketDispatchers = new SqlCommand(selectQueryBucketDispatchers, myCon);
+                    bucketDispatcherReader = getAllBucketDispatchers.ExecuteReader();
                     BucketDispatcherTable.Load(bucketDispatcherReader);
-                    bool bucketExists = BucketDispatcherTable.AsEnumerable().Any(row => bucketDispatcher.BucketId == row.Field<int>("BucketID"));
+                    bool bucketExists = BucketDispatcherTable.AsEnumerable().Any(row => bucketDispatcher.BucketId == row.Field<int>("BucketID") && bucketDispatcher.PlanId == row.Field<int>("PlanID"));
                     myCon.Close();
                     if (!bucketExists)
                     {
@@ -170,6 +169,7 @@ namespace ChronosAPI.Controllers
                     using (SqlCommand myCommand = new SqlCommand(query, myCon))
                     {
                         myCommand.Parameters.AddWithValue("@BucketID", bucketDispatcher.BucketId);
+                        myCommand.Parameters.AddWithValue("@PlanID", bucketDispatcher.PlanId);
                         myReader = myCommand.ExecuteReader();
                         table.Load(myReader);
                         myReader.Close();

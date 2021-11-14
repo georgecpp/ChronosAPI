@@ -124,7 +124,7 @@ namespace ChronosAPI.Services
                     myCommand.Parameters.AddWithValue("@Email", user.Email);
                     myCommand.Parameters.AddWithValue("@Password", user.Password);
                     myCommand.Parameters.AddWithValue("@DateOfBirth", user.DateOfBirth.Date);
-                    myCommand.Parameters.AddWithValue("@CreatedAt", user.CreatedAt);
+                    myCommand.Parameters.AddWithValue("@CreatedAt", ((object)user.CreatedAt) ?? DateTime.Now);
 
                     myReader = myCommand.ExecuteReader();
                     table.Load(myReader);
